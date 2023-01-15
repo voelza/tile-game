@@ -89,3 +89,21 @@ button:focus-visible {
   right: 15px;
   margin: 0;
 }
+
+dialog {
+  border: none;
+  background-color: gainsboro;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 3px 3px 5px 3px black;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  dialog {
+    background-color: #2f3133;
+  }
+}

@@ -47,7 +47,6 @@ function renderLevel(element: Element, state: RenderState, reset: () => void): v
                 addEndTile(tileElement, tile);
             }
 
-
             rowEle.appendChild(tileElement);
         }
         mapElement.appendChild(rowEle);
@@ -102,7 +101,7 @@ function addEndTile(tileElement: Element, tile: Tile): void {
 }
 
 
-export function renderVictoryAnimation() {
+export function renderVictoryAnimation(gameEndCallback: () => void) {
     for (let i = 0; i < 20; i++) {
         const confetti = createElement("span", `
             position: fixed;
@@ -118,6 +117,29 @@ export function renderVictoryAnimation() {
             confetti.remove();
         }, 1000);
     }
+
+    const dialog = createElement("dialog");
+    dialog.setAttribute("open", "");
+
+    const form = createElement("form");
+    form.setAttribute("method", "dialog");
+    const nextLevelBtn = createElement("button") as HTMLButtonElement;
+    nextLevelBtn.textContent = "Next Level";
+
+    const body = createElement("div");
+    body.textContent = `You did it!`;
+
+    form.appendChild(nextLevelBtn);
+    dialog.appendChild(body);
+    dialog.appendChild(form);
+    document.body.appendChild(dialog);
+
+    nextLevelBtn.focus();
+
+    dialog.addEventListener('close', () => {
+        dialog.remove();
+        gameEndCallback();
+    });
 }
 
 function createElement(tag: string, style: string | undefined = undefined): Element {
