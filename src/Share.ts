@@ -1,7 +1,7 @@
 import { Level, Position, TileType } from "./Game";
 
 export function stringifyLevel(level: Level): string {
-    return btoa(`${positionToStr(level.start)}~${positionToStr(level.end)}~${mapToStr(level.map)}`);
+    return encode(btoa(`${positionToStr(level.start)}~${positionToStr(level.end)}~${mapToStr(level.map)}`));
 }
 
 function positionToStr(position: Position): string {
@@ -20,7 +20,7 @@ function mapToStr(map: TileType[][]): string {
 }
 
 export function parseLevel(levelBase64: string): Level {
-    const levelStr = atob(levelBase64);
+    const levelStr = atob(decode(levelBase64));
     const [startPosStr, endPosStr, mapStr] = levelStr.split("~");
     return {
         start: strToPosition(startPosStr),
@@ -33,6 +33,7 @@ function strToPosition(startPosStr: string): Position {
     const [row, column] = startPosStr.split("-");
     return { row: parseInt(row), column: parseInt(column) };
 }
+
 function strToMap(mapStr: string): TileType[][] {
     const map: TileType[][] = [];
     const rows = mapStr.split("-");
@@ -46,3 +47,10 @@ function strToMap(mapStr: string): TileType[][] {
     return map;
 }
 
+function encode(base64: string): string {
+    return base64.replaceAll("+", ".").replaceAll("/", "_").replaceAll("=", "-");
+}
+
+function decode(base64: string): string {
+    return base64.replaceAll(".", "+").replaceAll("_", "/").replaceAll("-", "=");
+}
