@@ -1,4 +1,4 @@
-import { createInput } from "./Input";
+import { createInput, Handlers } from "./Input";
 import { queueRender, registerRender, renderVictoryAnimation } from "./Renderer";
 import { isOnTile } from "./Utils";
 
@@ -134,14 +134,15 @@ export function createGame(element: Element, level: Level, gameEndCallback: () =
         }
     }
 
-    createInput({
+    const handlers: Handlers = {
         up: () => move(Direction.UP),
         right: () => move(Direction.RIGHT),
         down: () => move(Direction.DOWN),
         left: () => move(Direction.LEFT),
         reset: () => createGame()
-    });
+    };
 
-    registerRender(element, createGame);
+    createInput(handlers);
+    registerRender(element, createGame, handlers);
     createGame();
 }

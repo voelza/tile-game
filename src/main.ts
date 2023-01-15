@@ -5,6 +5,8 @@ import { parseLevel, stringifyLevel } from './Share';
 import './style.css';
 import toast from './Toaster';
 
+export const smallDevice = document.body.getBoundingClientRect().width < 700;
+
 const levelFromParam = new URLSearchParams(location.search).get("level");
 
 if (levelFromParam) {

@@ -1,4 +1,6 @@
 import { Player, Position, Tile, TileType } from "./Game";
+import { Handlers } from "./Input";
+import { smallDevice as IS_SMALL_DEVICE } from "./main";
 import { isOnTile, randomIntFromInterval } from "./Utils";
 
 export type RenderState = {
@@ -14,18 +16,18 @@ export function queueRender(state: RenderState) {
 }
 
 let id: number | undefined = undefined;
-export function registerRender(element: Element, reset: () => void) {
+export function registerRender(element: Element, reset: () => void, handlers: Handlers | undefined) {
     clearInterval(id);
     id = setInterval(() => {
         if (renderQueue.length > 0) {
             console.log("Rendering UI");
             const render = renderQueue.shift()!;
-            renderLevel(element, render, reset);
+            renderLevel(element, render, reset, handlers);
         }
     }, 100);
 }
 
-function renderLevel(element: Element, state: RenderState, reset: () => void): void {
+function renderLevel(element: Element, state: RenderState, reset: () => void, handlers: Handlers | undefined): void {
     element.innerHTML = "";
     const resetBtn = createElement("button", "margin-left: auto;");
     resetBtn.textContent = "Reset (or press 'r')";
@@ -33,11 +35,13 @@ function renderLevel(element: Element, state: RenderState, reset: () => void): v
     element.appendChild(resetBtn);
 
     const mapElement = createElement("div");
+
+    const size = IS_SMALL_DEVICE ? 25 : 40;
     for (let row = 0; row < state.tiles.length; row++) {
         const rowEle = createElement("div", "display: flex;");
         for (let column = 0; column < state.tiles[row].length; column++) {
             const tile = state.tiles[row][column];
-            const tileElement = renderTile(tile);
+            const tileElement = renderTile(tile, size);
 
             if (isOnTile(row, column, state.player.position)) {
                 addPlayer(tileElement);
@@ -53,17 +57,17 @@ function renderLevel(element: Element, state: RenderState, reset: () => void): v
     }
     element.appendChild(mapElement);
 
-    const info = createElement("pre");
-    info.textContent = `To win fill all brown tiles with plants 🌾 
-    and end your journey on the golden tile with the tree 🌳.
-    Use arrow keys or 'wasd' to move.
-    
-    `;
-    element.appendChild(info);
+    if (!IS_SMALL_DEVICE) {
+        const info = createElement("pre", "text-align: left;");
+        info.textContent = "To win fill all brown tiles with plants 🌾\nand end on the golden tile with the tree🌳.\nUse arrow keys or 'wasd' to move.";
+        element.appendChild(info);
+    } else if (handlers) {
+        element.appendChild(createVisualInput(handlers));
+    }
 }
 
-function renderTile(tile: Tile): Element {
-    const tileElement = createElement("div", "display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px;");
+function renderTile(tile: Tile, size: number): Element {
+    const tileElement = createElement("div", `display: flex; flex-direction: column; align-items: center; justify-content: center; width: ${size}px; height: ${size}px;`);
     if (tile.type === TileType.ROAD) {
         appendStyle(tileElement, `
         background-color: goldenrod; 
@@ -100,6 +104,25 @@ function addEndTile(tileElement: Element, tile: Tile): void {
     tileElement.appendChild(tree);
 }
 
+function createVisualInput(handlers: Handlers): Element {
+    const container = createElement("div", "margin: auto; margin-top: 15px;");
+    container.appendChild(createBtn("⬆️", handlers.up));
+
+    const leftRightContainer = createElement("div");
+    leftRightContainer.appendChild(createBtn("⬅️", handlers.left));
+    leftRightContainer.appendChild(createBtn("➡️", handlers.right));
+    container.appendChild(leftRightContainer);
+
+    container.appendChild(createBtn("⬇️", handlers.down));
+    return container;
+}
+
+function createBtn(text: string, handler: () => void, style: string | undefined = undefined): Element {
+    const btn = createElement("button", style);
+    btn.textContent = text;
+    btn.addEventListener("click", handler);
+    return btn;
+}
 
 export function renderVictoryAnimation(gameEndCallback: () => void, shareCallback: (() => void) | undefined) {
     for (let i = 0; i < 20; i++) {
