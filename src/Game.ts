@@ -106,7 +106,7 @@ export class Player {
     }
 
 }
-export function createGame(element: Element, level: Level, gameEndCallback: () => void) {
+export function createGame(element: Element, level: Level, gameEndCallback: () => void, shareCallback: (() => void) | undefined = undefined) {
     let map: GameMap | undefined;
     let player: Player | undefined;
     const { end } = level;
@@ -120,7 +120,7 @@ export function createGame(element: Element, level: Level, gameEndCallback: () =
 
     const checkWinCondition = () => {
         if (map!.isCleared() && isOnTile(end.row, end.column, player!.position)) {
-            renderVictoryAnimation(gameEndCallback);
+            renderVictoryAnimation(gameEndCallback, shareCallback);
         }
     }
 

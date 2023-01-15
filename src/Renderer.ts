@@ -101,7 +101,7 @@ function addEndTile(tileElement: Element, tile: Tile): void {
 }
 
 
-export function renderVictoryAnimation(gameEndCallback: () => void) {
+export function renderVictoryAnimation(gameEndCallback: () => void, shareCallback: (() => void) | undefined) {
     for (let i = 0; i < 20; i++) {
         const confetti = createElement("span", `
             position: fixed;
@@ -109,37 +109,56 @@ export function renderVictoryAnimation(gameEndCallback: () => void) {
             
             left: ${randomIntFromInterval(0, document.body.clientWidth)}px;
             font-size: ${randomIntFromInterval(1, 3)}rem;
-            animation: bigMe 1s;
+            animation: bigMe 2s;
         `);
         confetti.textContent = "🎉";
         document.body.appendChild(confetti);
         setTimeout(() => {
             confetti.remove();
-        }, 1000);
+        }, 2000);
     }
 
-    const dialog = createElement("dialog");
+    const dialog = createElement("dialog") as HTMLDialogElement;
     dialog.setAttribute("open", "");
+    dialog.setAttribute("tabindex", "1");
 
     const form = createElement("form");
     form.setAttribute("method", "dialog");
-    const nextLevelBtn = createElement("button") as HTMLButtonElement;
-    nextLevelBtn.textContent = "Next Level";
+
+
 
     const body = createElement("div");
     body.textContent = `You did it!`;
-
-    form.appendChild(nextLevelBtn);
     dialog.appendChild(body);
+
+    if (shareCallback) {
+        const shareBtn = createElement("button") as HTMLButtonElement;
+        shareBtn.textContent = "Share ☍ (s)";
+        shareBtn.addEventListener("click", shareCallback);
+        dialog.appendChild(shareBtn);
+    }
+
+    const nextLevelBtn = createElement("button") as HTMLButtonElement;
+    nextLevelBtn.textContent = "Next Level (n)";
+    form.appendChild(nextLevelBtn);
     dialog.appendChild(form);
     document.body.appendChild(dialog);
 
-    nextLevelBtn.focus();
+    dialog.focus();
 
-    dialog.addEventListener('close', () => {
+    const close = () => {
         dialog.remove();
         gameEndCallback();
+    };
+    dialog.addEventListener("keydown", (e) => {
+        const key = e.key.toLowerCase();
+        if (key === "n") {
+            close();
+        } else if (key === "s" && shareCallback) {
+            shareCallback();
+        }
     });
+    dialog.addEventListener('close', close);
 }
 
 function createElement(tag: string, style: string | undefined = undefined): Element {
