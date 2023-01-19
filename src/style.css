@@ -128,3 +128,9 @@ dialog {
     overflow: auto;
   }
 }
+
+#share {
+  position: fixed;
+  right: 5px;
+  bottom: 5px;
+}

@@ -6,6 +6,16 @@ import './style.css';
 import toast from './Toaster';
 
 export const smallDevice = document.body.getBoundingClientRect().width < 700;
+const createShare = (level: Level) => {
+  return () => {
+    const header = 'Farmer Tile Game! 👩‍🌾\n';
+    navigator.clipboard.writeText(header + window.location.origin + `?level=${stringifyLevel(level)}`);
+    toast('Link was saved to clipboard!', {
+      messageStyle: 'text-align: center;',
+      backgroundColor: '#26c740d9'
+    });
+  }
+};
 
 const levelFromParam = new URLSearchParams(location.search).get("level");
 
@@ -15,14 +25,9 @@ if (levelFromParam) {
     () => {
       open(window.location.origin, "_self");
     },
-    () => {
-      const header = 'Farmer Tile Game! 👩‍🌾\n';
-      navigator.clipboard.writeText(header + window.location.origin + `?level=${stringifyLevel(level)}`);
-      toast('Link was saved to clipboard!', {
-        messageStyle: 'text-align: center;',
-        backgroundColor: '#26c740d9'
-      });
-    });
+    createShare(level));
+
+  document.getElementById("share")!.onclick = createShare(level);
 } else {
   const scoreBoard = document.getElementById("score")!;
   const storedScore = localStorage.getItem("tileGame:score");
@@ -47,15 +52,11 @@ if (levelFromParam) {
       document.getElementById("app")!,
       level,
       playRandomGeneratedLevel,
-      () => {
-        const header = 'Farmer Tile Game! 👩‍🌾\n';
-        navigator.clipboard.writeText(header + window.location.origin + `?level=${stringifyLevel(level!)}`);
-        toast('Link was saved to clipboard!', {
-          messageStyle: 'text-align: center;',
-          backgroundColor: '#26c740d9'
-        });
-      }
+      createShare(level)
     );
+
+    document.getElementById("share")!.onclick = createShare(level);
+
     increaseScore();
     if (score % 10 === 0 && size < 16) {
       size += 4;
